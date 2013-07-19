@@ -3,7 +3,13 @@ pbdeploy
 
 pbdeploy (port-based deploy) is a script for simplifying the deployment of your application, including starting/restarting/stopping processes, as well as handling pre/post steps like installing requirements, running database migrations, and running tests.
 
-to install: `pip install pbdeploy`. You can now run `pbdeploy` from any directory you place a `settings_deploy.py` file in, documented below.
+to install: `pip install pbdeploy`
+
+usage
+===
+Simply run `pbdeploy` from any directory you place a `settings_deploy.py` file in, documented below.
+
+You can run `pbdeploy --quick` to skip running before/after scripts, and `pbdeploy stop` to stop any services managed by pbdeploy.
 
 philosophy
 ===
@@ -18,7 +24,7 @@ getting started
 ===
 You'll just need to create a `settings_deploy.py` in whichever directory you plan to run `pbdeploy` from.
 
-This file will contain a short definition of each process to handle, as well as optionally anything to do before or after it:
+This file will contain a short definition of each process to handle. Here's a simple example:
 
     SERVICES = {
         "django": {
@@ -42,7 +48,7 @@ Here's a more complex example involving multiple services. Notice how the file i
     "gunicorn": {
             "port": 25590,
             "before": ["./before_deploy.sh"],
-            "start": ["gunicorn", "-D", "-c", "settings_gunicorn.py", "dslo.wsgi:application"],
+            "start": ["gunicorn", "-D", "-c", "settings_gunicorn.py", "yourapp.wsgi:application"],
             "restart": ["kill", "-s", "SIGHUP", "{pid}"],
             "after": ["./after_deploy.sh"],
         },
@@ -56,14 +62,37 @@ Here's a more complex example involving multiple services. Notice how the file i
     
 Parameters
 ===
-`start`: the command (as a list of arguments) to run to start the process if it isn't already running.
-`restart`: the command (as a list of arguments) to run to restart the process if it is already running. If you leave this absent, pbdeploy won't do anything for this process if it is already running.
-`port`: the port that the process runs on. pbdeploy uses this to determine if the process is running or not and get its pid. you'll need to specify either this or `pidfile`.
-`pidfile`: if your process runs on a dynamic port, or already writes a pidfile that you'd prefer to use, you can specify the location here instead of a `port`.
-`cwd`: the directory to run the start/restart commands from. default: the directory where `pbdeploy` is run.
-`before`: a command (as a list of arguments) to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above.
-`after`: a command (as a list of arguments) to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above.
-`daemonizes`: the default is True, but if you specify False, pbdeploy will handle backgrounding this process for you.
+* `start`: the command (as a list of arguments) to run to start the process if it isn't already running.
+* `restart`: the command (as a list of arguments) to run to restart the process if it is already running. If you leave this absent, pbdeploy won't do anything for this process if it is already running.
+* `stop`: the command (as a list of arguments!) to run to stop the process via `pbdeploy stop`. If you leave this blank, `kill {pid}` is assumed.
+* `port`: the port that the process runs on. pbdeploy uses this to determine if the process is running or not and get its pid. you'll need to specify either this or `pidfile`.
+* `pidfile`: if your process runs on a dynamic port, or already writes a pidfile that you'd prefer to use, you can specify the location here instead of a `port`.
+* `cwd`: the directory to run the start/restart commands from. default: the directory where `pbdeploy` is run.
+* `before`: a command (as a list of arguments) to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
+* `after`: a command (as a list of arguments) to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
+* `daemonizes`: the default is True, but if you specify False, pbdeploy will handle backgrounding this process for you.
+
+Continuous Deployment
+===
+A great use for before and after scripts is to run idempotent commands so that `pbdeploy` handles everything necessary for continuous deployment.
+
+For Django, a before script might be:
+
+    pip install -r ../requirements.txt | egrep -v "(Requirement already satisfied|Cleaning up)" || true
+    python manage.py collectstatic --noinput
+    
+and an after script might be:
+
+    python manage.py syncdb --migrate
+    python manage.py test yourapp 2>&1
+    
+an example git post-receive hook that runs all this and restarts your services for you on push might look like:
+
+    unset GIT_DIR
+    cd $YOUR_APP_DIR
+    git pull
+    source env/bin/activate
+    pbdeploy
 
 Templating
 ===
@@ -73,6 +102,5 @@ You can also specify a file to template, such as we do with nginx. When we speci
 
 Variables that exist for templating are:
 * {pid}: the pid of the process, determined either by the process listening on the specified port or the pidfile specified
-* {project_dir}: the absolute path of the directory pbdeploy was run from
+* {project_dir}: the absolute path of the directory pbdeploy was run from. This is especially useful for avoiding hard-coding paths in configuration files (like nginx.conf) that require absolute paths.
 * any parameter specified such as port/cwd/before/after, as well as arbitrary parameters you can choose to add yourself. This is quite powerful as you can dynamically compute / look up a value in settings_deploy.py that will end up in your service's typically config file on each start or restart.
-* 
