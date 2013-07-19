@@ -11,6 +11,10 @@ CWD = os.getcwd()
 sys.path.append(CWD)
 
 from settings_deploy import SERVICES
+try:
+    from settings_deploy import SHELL
+except ImportError:
+    SHELL = "/bin/bash"
 
 class Service(object):
     def __init__(self, name, port=None, pidfile=None, cwd=None, before=None, after=None, start=None, restart=None, stop=None, context=None, daemonizes=True, templates=None, **kwargs):
@@ -92,7 +96,7 @@ class Service(object):
             runner = subprocess.check_call
         else:
             runner = subprocess.Popen
-        return runner(subproc_cmd, cwd=self.cwd, shell=True)
+        return runner(subproc_cmd, cwd=self.cwd, shell=True, executable=SHELL)
 
     def before(self):
         if self.before_cmd is not False:
