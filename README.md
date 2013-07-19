@@ -13,9 +13,13 @@ to install: `pip install pbdeploy`
 
 usage
 ===
-Simply run `pbdeploy` from any directory you place a `settings_deploy.py` file in, documented below.
+Simply run `pbdeploy` from any directory you place a
+`settings_deploy.py` file in, documented below. When run, pbdeploy will
+start any service defined that isn't already running, and restart those
+which are. `pbdeploy stop` will shut down all services.
 
-You can run `pbdeploy --quick` to skip running before/after scripts, and `pbdeploy stop` to stop any services managed by pbdeploy.
+You can also run `pbdeploy --quick` to skip running before/after scripts
+you may have specified.
 
 philosophy
 ===
