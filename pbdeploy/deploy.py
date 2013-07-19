@@ -148,9 +148,12 @@ def deploy(services, stop=False, quick=False):
         else:
             service.start(quick)
 
-if __name__ == "__main__":
-    import sys
+def main(argv):
     service_objs = []
     for name, conf in SERVICES.items():
         service_objs.append(Service(name, **conf))
     deploy(service_objs, stop="stop" in sys.argv, quick="--quick" in sys.argv)
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv)
