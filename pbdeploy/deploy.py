@@ -22,7 +22,7 @@ class Service(object):
         self.after_cmd = after or False
         self.start_cmd = start
         self.restart_cmd = restart or False
-        self.stop_cmd = stop or "kill {pid}"
+        self.stop_cmd = stop or ["kill", "{pid}"]
         self.context = context or {}
         self.daemonizes = daemonizes
         self.templates = templates or []
@@ -85,14 +85,14 @@ class Service(object):
         for template in self.templates:
             Template(template).render(self)
 
-        subproc_cmd = self.format(cmd, **kwargs)
+        subproc_cmd = [self.format(arg, **kwargs) for arg in cmd]
 
-        print subproc_cmd
+        print " ".join(subproc_cmd)
         if self.daemonizes:
             runner = subprocess.check_call
         else:
             runner = subprocess.Popen
-        return runner(subproc_cmd, cwd=self.cwd, shell=True)
+        return runner(subproc_cmd, cwd=self.cwd)
 
     def before(self):
         if self.before_cmd is not False:
@@ -160,5 +160,5 @@ def main(argv):
     deploy(service_objs, stop="stop" in argv, quick="--quick" in argv)
 
 if __name__ == "__main__":
+    import sys
     main(sys.argv)
-
