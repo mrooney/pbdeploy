@@ -29,11 +29,11 @@ This file will contain a short definition of each process to handle. Here's a si
     SERVICES = {
         "django": {
                 "port": 8000,
-                "start": ["python", "manage.py", "runserver"],
+                "start": "python manage.py runserver",
         }
     }
     
-In this simple Django example, we just specify a name, and the port and start command (as a list of arguments). With this settings_deploy.py file in place, we can just run `pbdeploy` from this directory, and if it doesn't see a process already listening on port 8000, it will run the start command.
+In this simple Django example, we just specify a name, and the port and start command. With this settings_deploy.py file in place, we can just run `pbdeploy` from this directory, and if it doesn't see a process already listening on port 8000, it will run the start command.
 
 Here's a more complex example involving multiple services. Notice how the file is just Python so we can add any special logic we want, in this case using an environment variable for Solr:
 
@@ -41,20 +41,20 @@ Here's a more complex example involving multiple services. Notice how the file i
     SERVICES = {
     "nginx": {
             "port": 12818,
-            "start": ["nginx", "-c", "{project_dir}/nginx.conf"],
-            "restart": ["kill", "-s", "SIGHUP", "{pid}"],
+            "start": "nginx -c {project_dir}/nginx.conf",
+            "restart": "kill -s SIGHUP {pid}",
             "templates": ["nginx.conf.template"],
         },
     "gunicorn": {
             "port": 25590,
-            "before": ["./before_deploy.sh"],
-            "start": ["gunicorn", "-D", "-c", "settings_gunicorn.py", "yourapp.wsgi:application"],
-            "restart": ["kill", "-s", "SIGHUP", "{pid}"],
-            "after": ["./after_deploy.sh"],
+            "before": "./before_deploy.sh",
+            "start": "gunicorn -D -c settings_gunicorn.py yourapp.wsgi:application",
+            "restart": "kill -s SIGHUP {pid}",
+            "after": "./after_deploy.sh",
         },
     "solr": {
             "port": 28426,
-            "start": ["java", "-Djetty.port={port}", "-Djetty.pid={project_dir}/run/solr.pid", "-Dsolr.solr.home={project_dir}/../solr", "-jar","start.jar"],
+            "start": "java -Djetty.port={port} -Djetty.pid={project_dir}/run/solr.pid -Dsolr.solr.home={project_dir}/../solr -jar","start.jar",
             "cwd": os.getenv("SOLR_EXAMPLE"),
             "daemonizes": False,
         },
@@ -62,14 +62,14 @@ Here's a more complex example involving multiple services. Notice how the file i
     
 Parameters
 ===
-* `start`: the command (as a list of arguments) to run to start the process if it isn't already running.
-* `restart`: the command (as a list of arguments) to run to restart the process if it is already running. If you leave this absent, pbdeploy won't do anything for this process if it is already running.
-* `stop`: the command (as a list of arguments!) to run to stop the process via `pbdeploy stop`. If you leave this blank, `kill {pid}` is assumed.
+* `start`: the command to run to start the process if it isn't already running.
+* `restart`: the command  to run to restart the process if it is already running. If you leave this absent, pbdeploy won't do anything for this process if it is already running.
+* `stop`: the command  to run to stop the process via `pbdeploy stop`. If you leave this blank, `kill {pid}` is assumed.
 * `port`: the port that the process runs on. pbdeploy uses this to determine if the process is running or not and get its pid. you'll need to specify either this or `pidfile`.
 * `pidfile`: if your process runs on a dynamic port, or already writes a pidfile that you'd prefer to use, you can specify the location here instead of a `port`.
 * `cwd`: the directory to run the start/restart commands from. default: the directory where `pbdeploy` is run.
-* `before`: a command (as a list of arguments) to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
-* `after`: a command (as a list of arguments) to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
+* `before`: a command to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
+* `after`: a command to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
 * `daemonizes`: by default pbdeploy will wait for the `start` command to exit so it can report non-zero exit codes, but if you specify False, pbdeploy will background this process instead, useful for process that don't daemonize themselves.
 
 Continuous Deployment
