@@ -25,7 +25,7 @@ philosophy
 ===
 pbdeploy's philosophy is:
 
-1. to be a script, not a persistent process like supervisor. This means it doesn't require extra background memory or CPU cycles, and isn't a process that itself needs to be monitored.
+1. to be a stateless script, not a persistent process like supervisor. This means it doesn't require extra background memory or CPU cycles, and isn't a process that itself needs to be monitored.
 1. to understand that processes often run on specific ports, allowing us to bypass pid files and just ask the OS for the pid listening on that port. However, pbdeploy also handles pid files just fine.
 
 Both of these make pbdeploy perfect for running on a shared server like
