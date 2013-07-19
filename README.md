@@ -1,7 +1,7 @@
 pbdeploy
 ========
 
-pbdeploy (port-based deploy) is a script for simplifying the deployment of your application, including starting/restarting/stopping processes, as well as handling pre/post steps like installing requirements, running database migrations, and running tests.
+pbdeploy (port-based deploy) is a script for simplifying the (continuous) deployment of your application, including starting/restarting/stopping processes, as well as handling pre/post steps like installing requirements, running database migrations, and running tests.
 
 to install: `pip install pbdeploy`
 
@@ -101,6 +101,6 @@ pbdeploy supports templating in commands as well as files. For example, notice h
 You can also specify a file to template, such as we do with nginx. When we specify `templates: ["nginx.conf.template"]`, for each start/restart, pbdeploy will read `nginx.conf.template` and replace variables using Python string formatting, writing it out as just `nginx.conf`.
 
 Variables that exist for templating are:
-* {pid}: the pid of the process, determined either by the process listening on the specified port or the pidfile specified
-* {project_dir}: the absolute path of the directory pbdeploy was run from. This is especially useful for avoiding hard-coding paths in configuration files (like nginx.conf) that require absolute paths.
+* `{pid}`: the pid of the process, determined either by the process listening on the specified port or the pidfile specified
+* `{project_dir}`: the absolute path of the directory pbdeploy was run from. This is especially useful for avoiding hard-coding paths in configuration files (like nginx.conf) that require absolute paths.
 * any parameter specified such as port/cwd/before/after, as well as arbitrary parameters you can choose to add yourself. This is quite powerful as you can dynamically compute / look up a value in settings_deploy.py that will end up in your service's typically config file on each start or restart.
