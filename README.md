@@ -70,7 +70,7 @@ Parameters
 * `cwd`: the directory to run the start/restart commands from. default: the directory where `pbdeploy` is run.
 * `before`: a command (as a list of arguments) to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
 * `after`: a command (as a list of arguments) to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
-* `daemonizes`: the default is True, but if you specify False, pbdeploy will handle backgrounding this process for you.
+* `daemonizes`: by default pbdeploy will wait for the `start` command to exit so it can report non-zero exit codes, but if you specify False, pbdeploy will background this process instead, useful for process that don't daemonize themselves.
 
 Continuous Deployment
 ===
