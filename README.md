@@ -3,7 +3,7 @@ pbdeploy
 
 pbdeploy (port-based deploy) is a script for simplifying the deployment of your application, including starting/restarting/stopping processes, as well as handling pre/post steps like installing requirements, running database migrations, and running tests.
 
-to install: `pip install pbdeploy`
+to install: `pip install pbdeploy`. You can now run `pbdeploy` from any directory you place a `settings_deploy.py` file in, documented below.
 
 philosophy
 ===
