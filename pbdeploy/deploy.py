@@ -2,8 +2,13 @@
 import os
 import re
 import subprocess
+import sys
 
 import psutil
+
+# Add the cwd to the path so pbdeploy can import settings_deploy.
+CWD = os.getcwd()
+sys.path.append(CWD)
 
 from settings_deploy import SERVICES
 
@@ -25,7 +30,7 @@ class Service(object):
 
     def get_default_context(self, withpid=True):
         context = {
-            'project_dir': os.path.abspath(os.path.dirname(__file__)),
+            'project_dir': os.path.abspath(CWD),
             'pid': self.get_pid() if withpid else None,
         }
         context.update(self.__dict__)
@@ -152,7 +157,7 @@ def main(argv):
     service_objs = []
     for name, conf in SERVICES.items():
         service_objs.append(Service(name, **conf))
-    deploy(service_objs, stop="stop" in sys.argv, quick="--quick" in sys.argv)
+    deploy(service_objs, stop="stop" in argv, quick="--quick" in argv)
 
 if __name__ == "__main__":
     import sys
