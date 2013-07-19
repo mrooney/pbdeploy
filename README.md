@@ -81,7 +81,9 @@ Parameters
 * `cwd`: the directory to run the start/restart commands from. default: the directory where `pbdeploy` is run.
 * `before`: a command to run before the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
 * `after`: a command to run after the service is started or restarted. For running multiple commands, put them in a script and specify that, as in the example above. This won't be run if you `pbdeploy --quick`.
-* `daemonizes`: by default pbdeploy will wait for the `start` command to exit so it can report non-zero exit codes, but if you specify False, pbdeploy will background this process instead, useful for process that don't daemonize themselves.
+* `daemonizes`: by default pbdeploy will wait for the `start` command to
+exit so it can report non-zero exit codes, but if you specify False,
+pbdeploy will background this process instead, useful for processes that don't daemonize themselves.
 
 Continuous Deployment
 ===
@@ -114,4 +116,7 @@ You can also specify a file to template, such as we do with nginx. When we speci
 Variables that exist for templating are:
 * `{pid}`: the pid of the process, determined either by the process listening on the specified port or the pidfile specified
 * `{project_dir}`: the absolute path of the directory pbdeploy was run from. This is especially useful for avoiding hard-coding paths in configuration files (like nginx.conf) that require absolute paths.
-* any parameter specified such as port/cwd/before/after, as well as arbitrary parameters you can choose to add yourself. This is quite powerful as you can dynamically compute / look up a value in settings_deploy.py that will end up in your service's typically config file on each start or restart.
+* any parameter specified such as port/cwd/before/after, as well as
+arbitrary parameters you can choose to add yourself. This is quite
+powerful as you can dynamically compute / look up a value in
+settings_deploy.py that will end up in your service's otherwise static config file on each start or restart.
