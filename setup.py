@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='pbdeploy',
     description='a port-based deployment framework for practicing continuous deployment',
-    version='1.3',
+    version='1.4',
     packages=['pbdeploy'],
     scripts=['bin/pbdeploy'],
     license='The MIT License',
