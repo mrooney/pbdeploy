@@ -2,8 +2,8 @@ pbdeploy
 ========
 
 pbdeploy (port-based deploy) is a script that handles starting,
-reloading and stopping your server processes, without taking up extra
-resources or requiring pidfiles.
+reloading and stopping your server processes, without requiring a
+daemon or pidfiles.
 
 It also supports running scripts before and after certain services are
 loaded, such as installing requirements, performing database migrations,
@@ -13,40 +13,37 @@ to install: `pip install pbdeploy`
 
 usage
 ===
-Simply run `pbdeploy` from any directory you place a
-`settings_deploy.py` file in, documented below. When run, pbdeploy will
-start any service defined that isn't already running, and restart those
-which are. `pbdeploy stop` will shut down all services.
-
-You can also run `pbdeploy --quick` to skip running before/after scripts
-you may have specified.
-
-philosophy
-===
-pbdeploy's philosophy is:
-
-1. to be a stateless script, not a persistent process like supervisor. This means it doesn't require extra background memory or CPU cycles, and isn't a process that itself needs to be monitored.
-1. to understand that processes often run on specific ports, allowing us to bypass pid files and just ask the OS for the pid listening on that port. However, pbdeploy also handles pid files just fine.
-
-Both of these make pbdeploy perfect for running on a shared server like
-WebFaction where memory is limited and services are already bound to specific ports, however it also works just as well for local development on OSX or production deployment on AWS.
-
-getting started
-===
-You'll just need to create a `settings_deploy.py` in whichever directory you plan to run `pbdeploy` from.
-
-This file will contain a short definition of each process to handle. Here's a simple example:
+First, create a `settings_deploy.py` file anywhere in your project:
 
     SERVICES = {
         "django": {
                 "port": 8000,
                 "start": "python manage.py runserver",
-        }
+        },
+        "nginx": {
+                "port": 8080,
+                "start": "nginx -c {project_dir}/nginx.conf",
+                "restart": "kill -s SIGHUP {pid}",
+        },
     }
     
-In this simple Django example, we just specify a name, and the port and start command. With this settings_deploy.py file in place, we can just run `pbdeploy` from this directory, and if it doesn't see a process already listening on port 8000, it will run the start command.
+In this example, we run django and also nginx. `project_dir` and `pid`
+are special variables that are always available, `project_dir` being the
+directory containing `settings_deploy.py` and `pid` being the pid of the
+process being managed.
 
-Here's a more complex example involving multiple services. Notice how the file is just Python so we can add any special logic we want, in this case using an environment variable for Solr:
+Now, simply run `pbdeploy` from the same directory, and pbdeploy will
+run the start command if there isn't a process listening on the
+specified port, otherwise it will issue the restart command. If no
+restart command is specified, in the case of Django, pbdeploy won't do
+anything if the process is already running.
+
+To stop your processes, run `pbdeploy stop`.
+
+going further
+===
+Here's a more complex example that takes advantage of more of pbdeploy's
+features. Notice how the file is just Python so we can add any special logic we want, in this case using an environment variable for Solr:
 
     import os
     SERVICES = {
@@ -58,10 +55,10 @@ Here's a more complex example involving multiple services. Notice how the file i
         },
     "gunicorn": {
             "port": 25590,
-            "before": "./before_deploy.sh",
             "start": "gunicorn -D -c settings_gunicorn.py yourapp.wsgi:application",
             "restart": "kill -s SIGHUP {pid}",
-            "after": "./after_deploy.sh",
+            "before": "pip install -r requirements.txt",
+            "after": "manage.py syncdb --migrate ",
         },
     "solr": {
             "port": 28426,
@@ -71,6 +68,19 @@ Here's a more complex example involving multiple services. Notice how the file i
         },
     }
     
+
+philosophy
+===
+pbdeploy's philosophy is:
+
+1. to be a stateless script, not a persistent process like supervisor. This means it doesn't require extra background memory or CPU cycles, and isn't a process that itself needs to be monitored.
+1. understanding that processes often run on specific ports, allowing us to bypass pid files and just ask the OS for the pid listening on that port. However, pbdeploy also handles pid files just fine.
+
+Both of these make pbdeploy perfect for running on a shared server like
+WebFaction where memory is limited and services are already bound to
+specific ports, and it also works just swell anywhere from local development on
+OSX to production deployment on EC2.
+
 Parameters
 ===
 * `start`: the command to run to start the process if it isn't already running.
