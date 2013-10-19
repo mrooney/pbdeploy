@@ -13,7 +13,8 @@ to install: `pip install pbdeploy`
 
 usage
 ===
-First, create a `settings_deploy.py` file anywhere in your project:
+First, create a `settings_deploy.py` file anywhere in your project.
+Here's an example:
 
     SERVICES = {
         "django": {
@@ -114,7 +115,7 @@ an example git post-receive hook that runs all this and restarts your services f
     unset GIT_DIR
     cd $YOUR_APP_DIR
     git pull
-    source env/bin/activate
+    source env/bin/activate # if using virtualenv
     pbdeploy
 
 Templating
