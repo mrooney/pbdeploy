@@ -77,7 +77,7 @@ class Service(object):
             results = subprocess.check_output(["lsof", "-i", ":%i"%self.port], env={"PATH": path}).splitlines()[1:]
         except subprocess.CalledProcessError:
             return None
-        procs = [int(re.findall("[\w-]+", r)[1]) for r in results if "(LISTEN)" in r]
+        procs = [int(re.findall("[\w\.-]+", r)[1]) for r in results if "(LISTEN)" in r]
         # Assume the oldest process is the parent/master process.
         if procs:
             parent = sorted(procs, key=lambda p: psutil.Process(p).create_time)[0]
