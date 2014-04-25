@@ -72,6 +72,7 @@ class Service(object):
             return pid
 
     def get_pid_from_port(self):
+        #TODO: use https://pythonhosted.org/psutil/#network instead of lsof.
         try:
             path = "/usr/bin:/usr/sbin"
             results = subprocess.check_output(["lsof", "-i", ":%i"%self.port], env={"PATH": path}).splitlines()[1:]
