@@ -1,3 +1,8 @@
+1.8
+---
+- setup.py change to ensure we are using a compatible psutil version for
+  previous change
+
 1.7
 ---
 - fix bug in detecting master process based on oldest pid
