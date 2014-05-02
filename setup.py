@@ -11,5 +11,5 @@ setup(
     author='Michael Rooney',
     author_email='mrooney.pbdeploy@rowk.com',
     url='https://github.com/mrooney/pbdeploy',
-    install_requires=['psutil'],
+    install_requires=['psutil==2.1.0'],
 )
