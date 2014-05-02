@@ -1,3 +1,7 @@
+1.7
+---
+- fix bug in detecting master process based on oldest pid
+
 1.6
 ---
 - fix issue finding the pid of processes with periods in their names (such as python2.7)
